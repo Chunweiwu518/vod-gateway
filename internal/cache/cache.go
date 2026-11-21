@@ -160,6 +160,13 @@ func (c *Cache) Get(ctx context.Context, key string, soft time.Duration, load Lo
 
 	// 擊穿保護：同一個 key 只有一個 goroutine 去 loader，其餘等結果。
 	ch := c.sf.DoChan(key, func() (any, error) {
+		// 雙重檢查：上一輪 flight 剛結束、這個 goroutine 才晚到的話，結果已經在 L1，不要再回源一次。
+		if e, ok := c.l1.get(key, time.Now()); ok && time.Now().Before(e.softExp) {
+			if e.null {
+				return Result{Source: SourceNull}, nil
+			}
+			return Result{Val: e.val, Source: SourceL1}, nil
+		}
 		lctx, cancel := context.WithTimeout(context.WithoutCancel(ctx), c.opt.LoadTimeout)
 		defer cancel()
 		return c.loadAndStore(lctx, key, soft, load, stale)
