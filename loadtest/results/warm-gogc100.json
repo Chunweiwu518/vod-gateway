@@ -1,0 +1,14 @@
+{
+  "qps": 19999.027835287652,
+  "requests": 240053,
+  "p50_ms": 2.708197,
+  "p95_ms": 19.93037979999999,
+  "p99_ms": 40.06279744000004,
+  "avg_ms": 5.644483940429769,
+  "error_rate": 0,
+  "gc_cycles": 71,
+  "gc_pause_total_ms": 213.1,
+  "alloc_bytes_per_req": 4675,
+  "mallocs_per_req": 63.4,
+  "api_mem": "65.84MiB"
+}

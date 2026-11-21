@@ -105,7 +105,10 @@ func run(log *slog.Logger) error {
 	go srv.RunBackground(ctx)
 
 	hm := obs.NewHTTPMetrics(reg)
-	handler := otelhttp.NewHandler(obs.Middleware(log, hm, h), "vod-api")
+	var handler http.Handler = obs.Middleware(log, hm, config.Int("ACCESS_LOG_SAMPLE", 1), h)
+	if config.Str("OTEL_TRACES", "off") != "off" { // tracing 關閉時不套 otelhttp：它即使不取樣也會替每個請求配置屬性與 span
+		handler = otelhttp.NewHandler(handler, "vod-api")
+	}
 	httpSrv := &http.Server{Addr: config.Str("ADDR", ":8080"), Handler: handler, ReadHeaderTimeout: 5 * time.Second}
 	go func() {
 		<-ctx.Done()

@@ -1,0 +1,86 @@
+# after CPU top (flat)
+Time: 2026-11-21 09:19:50 UTC
+Duration: 25s, Total samples = 78.17s (312.64%)
+Showing nodes accounting for 43.43s, 55.56% of 78.17s total
+Dropped 1062 nodes (cum <= 0.39s)
+Showing top 15 nodes out of 251
+      flat  flat%   sum%        cum   cum%
+    36.37s 46.53% 46.53%     36.37s 46.53%  internal/runtime/syscall/linux.Syscall6
+     0.97s  1.24% 47.77%      0.97s  1.24%  runtime.futex
+     0.81s  1.04% 48.80%      0.81s  1.04%  runtime.memmove
+     0.71s  0.91% 49.71%      0.71s  0.91%  runtime.spanClass.sizeclass
+     0.65s  0.83% 50.54%      0.65s  0.83%  runtime.asyncPreempt
+     0.55s   0.7% 51.25%      0.55s   0.7%  time.runtimeNow
+     0.43s  0.55% 51.80%      0.56s  0.72%  runtime.mallocgcSmallScanNoHeaderSC2
+     0.43s  0.55% 52.35%      0.60s  0.77%  runtime.mallocgcSmallScanNoHeaderSC5
+     0.42s  0.54% 52.88%      0.42s  0.54%  internal/runtime/maps.memHashAES
+     0.42s  0.54% 53.42%      0.42s  0.54%  runtime.memclrNoHeapPointers
+     0.39s   0.5% 53.92%      0.89s  1.14%  internal/runtime/maps.(*Map).getWithoutKeySmallFastStr
+     0.36s  0.46% 54.38%      3.68s  4.71%  runtime.mallocgc
+     0.32s  0.41% 54.79%      1.74s  2.23%  runtime.mapaccess2_faststr
+
+# after CPU top (cum)
+Showing nodes accounting for 37.66s, 48.18% of 78.17s total
+Dropped 1062 nodes (cum <= 0.39s)
+Showing top 22 nodes out of 251
+      flat  flat%   sum%        cum   cum%
+     0.11s  0.14%  0.14%     54.85s 70.17%  net/http.(*conn).serve
+    36.37s 46.53% 46.67%     36.37s 46.53%  internal/runtime/syscall/linux.Syscall6
+         0     0% 46.67%     36.12s 46.21%  internal/poll.ignoringEINTRIO (inline)
+     0.06s 0.077% 46.74%     35.89s 45.91%  syscall.Syscall
+     0.21s  0.27% 47.01%     35.65s 45.61%  syscall.RawSyscall6
+     0.05s 0.064% 47.08%     31.10s 39.79%  internal/poll.(*FD).Write
+     0.06s 0.077% 47.15%     31.07s 39.75%  net.(*conn).Write
+     0.06s 0.077% 47.23%        31s 39.66%  net.(*netFD).Write
+     0.01s 0.013% 47.24%     30.90s 39.53%  syscall.Write (inline)
+     0.05s 0.064% 47.31%     30.89s 39.52%  syscall.write
+     0.08s   0.1% 47.41%     27.10s 34.67%  bufio.(*Writer).Flush
+     0.04s 0.051% 47.46%     24.13s 30.87%  net/http.serverHandler.ServeHTTP
+     0.16s   0.2% 47.67%     24.09s 30.82%  net/http.HandlerFunc.ServeHTTP
+     0.20s  0.26% 47.92%     24.03s 30.74%  github.com/Chunweiwu518/vod-gateway/internal/obs.Middleware.func1
+     0.03s 0.038% 47.96%     19.71s 25.21%  github.com/Chunweiwu518/vod-gateway/internal/api.(*Server).ipLimit.func1
+     0.05s 0.064% 48.02%     19.21s 24.57%  net/http.(*response).finishRequest
+     0.05s 0.064% 48.09%     19.20s 24.56%  net/http.(*ServeMux).ServeHTTP
+     0.02s 0.026% 48.11%     17.82s 22.80%  net/http.checkConnErrorWriter.Write
+         0     0% 48.11%     14.60s 18.68%  golang.org/x/sync/singleflight.(*Group).doCall
+     0.01s 0.013% 48.13%     14.43s 18.46%  golang.org/x/sync/singleflight.(*Group).doCall.func2
+     0.02s 0.026% 48.15%     14.42s 18.45%  github.com/Chunweiwu518/vod-gateway/internal/cache.(*Cache).Get.func1
+     0.02s 0.026% 48.18%     14.12s 18.06%  github.com/Chunweiwu518/vod-gateway/internal/cache.(*Cache).loadAndStore
+
+# after mutex top
+Time: 2026-11-21 09:20:15 UTC
+Showing nodes accounting for 144.74s, 76.20% of 189.95s total
+Dropped 384 nodes (cum <= 0.95s)
+Showing top 12 nodes out of 132
+      flat  flat%   sum%        cum   cum%
+   109.66s 57.73% 57.73%    109.75s 57.78%  sync.(*Mutex).Unlock (partial-inline)
+         0     0% 57.73%     95.92s 50.50%  github.com/Chunweiwu518/vod-gateway/internal/cache.(*Cache).putL1
+         0     0% 57.73%     95.92s 50.50%  github.com/Chunweiwu518/vod-gateway/internal/cache.(*l1).put
+    35.08s 18.47% 76.20%     95.88s 50.47%  sync.(*RWMutex).Unlock
+         0     0% 76.20%     82.33s 43.35%  golang.org/x/sync/singleflight.(*Group).doCall
+         0     0% 76.20%     80.33s 42.29%  golang.org/x/sync/singleflight.(*Group).DoChan.gowrap1
+         0     0% 76.20%     80.19s 42.22%  github.com/Chunweiwu518/vod-gateway/internal/cache.(*Cache).Get.func1
+         0     0% 76.20%     80.19s 42.22%  golang.org/x/sync/singleflight.(*Group).doCall.func2
+         0     0% 76.20%     79.86s 42.04%  github.com/Chunweiwu518/vod-gateway/internal/cache.(*Cache).loadAndStore
+         0     0% 76.20%     72.76s 38.30%  net/http.(*conn).serve
+         0     0% 76.20%     69.11s 36.38%  github.com/Chunweiwu518/vod-gateway/internal/obs.Middleware.func1
+         0     0% 76.20%     69.11s 36.38%  net/http.HandlerFunc.ServeHTTP
+
+# after allocs (alloc_space)
+Time: 2026-11-21 09:20:15 UTC
+Showing nodes accounting for 2172.01MB, 67.61% of 3212.57MB total
+Dropped 219 nodes (cum <= 16.06MB)
+Showing top 12 nodes out of 126
+      flat  flat%   sum%        cum   cum%
+  328.59MB 10.23% 10.23%   328.59MB 10.23%  net/textproto.readMIMEHeader
+  301.58MB  9.39% 19.62%   301.58MB  9.39%  net/http.Header.Clone (inline)
+  274.08MB  8.53% 28.15%   274.08MB  8.53%  net/textproto.MIMEHeader.Set (inline)
+  234.57MB  7.30% 35.45%   234.57MB  7.30%  net/http.(*Request).WithContext
+  221.07MB  6.88% 42.33%   677.67MB 21.09%  net/http.readRequestLimit
+  196.04MB  6.10% 48.43%   954.72MB 29.72%  net/http.(*conn).readRequest
+  141.51MB  4.40% 52.84%   184.51MB  5.74%  go.opentelemetry.io/otel/internal/global.(*tracer).newSpan
+  110.51MB  3.44% 56.28%   110.51MB  3.44%  context.WithValue
+   99.51MB  3.10% 59.37%    99.51MB  3.10%  net/url.parse
+   93.01MB  2.90% 62.27%    93.01MB  2.90%  log/slog.(*commonHandler).clone
+   91.53MB  2.85% 65.12%    92.03MB  2.86%  net/url.parseQuery
+      80MB  2.49% 67.61%   739.22MB 23.01%  github.com/Chunweiwu518/vod-gateway/internal/api.(*Server).cached

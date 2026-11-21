@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/testutil"
@@ -34,7 +35,7 @@ func TestMiddleware_RequestIDLogsMetricsAndTraces(t *testing.T) {
 		L(r.Context()).Info("handler ran")
 		w.Write([]byte("ok"))
 	})
-	h := otelhttp.NewHandler(Middleware(log, m, mux), "vod-api")
+	h := otelhttp.NewHandler(Middleware(log, m, 1, mux), "vod-api")
 
 	// 沿用呼叫端帶來的 request id
 	r := httptest.NewRequest("GET", "/videos/42", nil)
@@ -104,5 +105,31 @@ func TestMiddleware_RequestIDLogsMetricsAndTraces(t *testing.T) {
 	}
 	if len(tids) != 2 { // 兩個請求兩條 trace，每條 trace 內的 span 共用 trace id
 		t.Fatalf("want 2 traces, got %d", len(tids))
+	}
+}
+
+// access log 抽樣：成功請求 1/100，錯誤與慢請求一律寫；指標每個請求都記。
+func TestMiddleware_AccessLogSampling(t *testing.T) {
+	var logs bytes.Buffer
+	log := slog.New(slog.NewJSONHandler(&logs, nil))
+	m := NewHTTPMetrics(prometheus.NewRegistry())
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /ok", func(w http.ResponseWriter, r *http.Request) {})
+	mux.HandleFunc("GET /bad", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(500) })
+	mux.HandleFunc("GET /slow", func(w http.ResponseWriter, r *http.Request) { time.Sleep(SlowRequest + 20*time.Millisecond) })
+	h := Middleware(log, m, 100, mux)
+	for i := 0; i < 1000; i++ {
+		h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("GET", "/ok", nil))
+	}
+	for i := 0; i < 50; i++ {
+		h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("GET", "/bad", nil))
+	}
+	h.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest("GET", "/slow", nil))
+	n := func(route string) int { return strings.Count(logs.String(), `"route":"`+route+`"`) }
+	if n("GET /ok") != 10 || n("GET /bad") != 50 || n("GET /slow") != 1 {
+		t.Fatalf("ok=%d bad=%d slow=%d, want 10/50/1", n("GET /ok"), n("GET /bad"), n("GET /slow"))
+	}
+	if got := testutil.ToFloat64(m.requests.WithLabelValues("GET /ok", "GET", "200")); got != 1000 {
+		t.Fatalf("metrics must count every request, got %v", got)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
@@ -23,6 +24,13 @@ import (
 )
 
 const Tracer = "vod-gateway"
+
+// SlowRequest 以上的請求不管有沒有被抽樣都會寫 access log。
+const SlowRequest = 200 * time.Millisecond
+
+// tracer 啟動時取一次。每次呼叫 otel.Tracer() 都要過全域 provider 的 mutex，熱路徑上不值得。
+// 之後 SetTracerProvider 會讓這個 tracer 自動委派給新的 provider。
+var tracer = otel.Tracer(Tracer)
 
 type ctxKey struct{}
 
@@ -80,7 +88,11 @@ func (w *statusWriter) Write(b []byte) (int, error) {
 func (w *statusWriter) Unwrap() http.ResponseWriter { return w.ResponseWriter }
 
 // Middleware：產生／沿用 X-Request-Id、把帶 request id 的 logger 放進 context、記指標、寫 access log。
-func Middleware(log *slog.Logger, m *HTTPMetrics, next http.Handler) http.Handler {
+//
+// sample：成功的請求每 sample 筆才寫一筆 access log（1 = 全寫）；4xx／5xx 與超過 SlowRequest 的一律寫。
+// 指標與 tracing 不受影響，每個請求都會記。
+func Middleware(log *slog.Logger, m *HTTPMetrics, sample int, next http.Handler) http.Handler {
+	var seq atomic.Uint64
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		id := r.Header.Get("X-Request-Id")
@@ -108,6 +120,9 @@ func Middleware(log *slog.Logger, m *HTTPMetrics, next http.Handler) http.Handle
 		m.requests.WithLabelValues(route, r.Method, strconv.Itoa(sw.code)).Inc()
 		m.latency.WithLabelValues(route).Observe(dur.Seconds())
 		trace.SpanFromContext(ctx).SetName(route)
+		if sample > 1 && sw.code < 400 && dur < SlowRequest && seq.Add(1)%uint64(sample) != 0 {
+			return
+		}
 		l.Info("request", "method", r.Method, "path", r.URL.Path, "route", route, "status", sw.code,
 			"bytes", sw.bytes, "dur_ms", float64(dur.Microseconds())/1000, "ip", r.RemoteAddr)
 	})
@@ -151,5 +166,5 @@ func NewProvider(exp sdktrace.SpanExporter, ratio float64) *sdktrace.TracerProvi
 
 // Span 開一個子 span。
 func Span(ctx context.Context, name string, attrs ...attribute.KeyValue) (context.Context, trace.Span) {
-	return otel.Tracer(Tracer).Start(ctx, name, trace.WithAttributes(attrs...))
+	return tracer.Start(ctx, name, trace.WithAttributes(attrs...))
 }

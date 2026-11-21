@@ -1,0 +1,86 @@
+# baseline CPU top (flat)
+Time: 2026-11-21 09:04:58 UTC
+Duration: 25s, Total samples = 73.41s (293.63%)
+Showing nodes accounting for 36.01s, 49.05% of 73.41s total
+Dropped 1119 nodes (cum <= 0.37s)
+Showing top 15 nodes out of 296
+      flat  flat%   sum%        cum   cum%
+    28.80s 39.23% 39.23%     28.80s 39.23%  internal/runtime/syscall/linux.Syscall6
+     1.10s  1.50% 40.73%      1.10s  1.50%  runtime.futex
+     0.77s  1.05% 41.78%      0.77s  1.05%  runtime.memmove
+     0.74s  1.01% 42.79%      0.74s  1.01%  runtime.asyncPreempt
+     0.66s   0.9% 43.69%      0.66s   0.9%  runtime.spanClass.sizeclass (inline)
+     0.57s  0.78% 44.46%      0.57s  0.78%  runtime.memclrNoHeapPointers
+     0.45s  0.61% 45.08%      0.45s  0.61%  time.runtimeNow
+     0.40s  0.54% 45.62%      0.69s  0.94%  runtime.mallocgcSmallScanNoHeaderSC2
+     0.39s  0.53% 46.15%     31.52s 42.94%  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp.(*middleware).serveHTTP
+     0.39s  0.53% 46.68%      4.18s  5.69%  runtime.mallocgc
+     0.39s  0.53% 47.21%      0.39s  0.53%  runtime.nextFreeFast (inline)
+     0.38s  0.52% 47.73%      0.38s  0.52%  runtime.usleep
+     0.33s  0.45% 48.18%      0.66s   0.9%  github.com/felixge/httpsnoop.Wrap
+
+# baseline CPU top (cum)
+Showing nodes accounting for 30.43s, 41.45% of 73.41s total
+Dropped 1119 nodes (cum <= 0.37s)
+Showing top 22 nodes out of 296
+      flat  flat%   sum%        cum   cum%
+     0.17s  0.23%  0.23%     55.08s 75.03%  net/http.(*conn).serve
+     0.05s 0.068%   0.3%     31.60s 43.05%  net/http.serverHandler.ServeHTTP
+     0.13s  0.18%  0.48%     31.55s 42.98%  net/http.HandlerFunc.ServeHTTP
+     0.02s 0.027%   0.5%     31.54s 42.96%  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp.NewMiddleware.func2.1
+     0.39s  0.53%  1.04%     31.52s 42.94%  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp.(*middleware).serveHTTP
+    28.80s 39.23% 40.27%     28.80s 39.23%  internal/runtime/syscall/linux.Syscall6
+         0     0% 40.27%     28.60s 38.96%  internal/poll.ignoringEINTRIO (inline)
+     0.04s 0.054% 40.32%     28.43s 38.73%  syscall.Syscall
+     0.09s  0.12% 40.44%     28.24s 38.47%  syscall.RawSyscall6
+     0.16s  0.22% 40.66%     25.74s 35.06%  github.com/Chunweiwu518/vod-gateway/internal/obs.Middleware.func1
+     0.06s 0.082% 40.74%     24.65s 33.58%  internal/poll.(*FD).Write
+     0.01s 0.014% 40.76%     24.38s 33.21%  syscall.Write (inline)
+     0.02s 0.027% 40.78%     24.37s 33.20%  syscall.write
+     0.05s 0.068% 40.85%     22.55s 30.72%  net.(*conn).Write
+     0.11s  0.15% 41.00%     22.50s 30.65%  net.(*netFD).Write
+     0.10s  0.14% 41.14%     20.20s 27.52%  bufio.(*Writer).Flush
+     0.04s 0.054% 41.19%     15.55s 21.18%  github.com/Chunweiwu518/vod-gateway/internal/api.(*Server).ipLimit.func1
+     0.02s 0.027% 41.22%     15.12s 20.60%  net/http.(*ServeMux).ServeHTTP
+     0.05s 0.068% 41.29%     14.47s 19.71%  net/http.(*response).finishRequest
+     0.08s  0.11% 41.40%     13.48s 18.36%  net/http.checkConnErrorWriter.Write
+     0.04s 0.054% 41.45%     10.62s 14.47%  github.com/Chunweiwu518/vod-gateway/internal/api.(*Server).cached
+         0     0% 41.45%     10.12s 13.79%  golang.org/x/sync/singleflight.(*Group).doCall
+
+# baseline mutex top
+Time: 2026-11-21 09:05:23 UTC
+Showing nodes accounting for 644.11s, 89.82% of 717.14s total
+Dropped 450 nodes (cum <= 3.59s)
+Showing top 12 nodes out of 88
+      flat  flat%   sum%        cum   cum%
+   644.11s 89.82% 89.82%    646.60s 90.16%  sync.(*Mutex).Unlock
+         0     0% 89.82%    633.73s 88.37%  net/http.(*conn).serve
+         0     0% 89.82%    630.92s 87.98%  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp.(*middleware).serveHTTP
+         0     0% 89.82%    630.92s 87.98%  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp.NewMiddleware.func2.1
+         0     0% 89.82%    630.92s 87.98%  net/http.HandlerFunc.ServeHTTP
+         0     0% 89.82%    630.92s 87.98%  net/http.serverHandler.ServeHTTP
+         0     0% 89.82%    625.03s 87.16%  net/http.(*Server).Serve.gowrap3
+         0     0% 89.82%    611.26s 85.24%  github.com/Chunweiwu518/vod-gateway/internal/obs.Middleware.func1
+         0     0% 89.82%    562.19s 78.39%  log/slog.(*JSONHandler).Handle
+         0     0% 89.82%    562.19s 78.39%  log/slog.(*Logger).Info
+         0     0% 89.82%    562.19s 78.39%  log/slog.(*Logger).log
+         0     0% 89.82%    562.19s 78.39%  log/slog.(*commonHandler).handle
+
+# baseline allocs (alloc_space)
+Time: 2026-11-21 09:05:23 UTC
+Showing nodes accounting for 2649.34MB, 63.61% of 4165.23MB total
+Dropped 268 nodes (cum <= 20.83MB)
+Showing top 12 nodes out of 138
+      flat  flat%   sum%        cum   cum%
+  355.24MB  8.53%  8.53%   355.24MB  8.53%  go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp/internal/semconv.HTTPServer.RequestTraceAttrs
+  311.09MB  7.47% 16.00%   311.09MB  7.47%  net/http.(*Request).WithContext
+  246.06MB  5.91% 21.91%   246.06MB  5.91%  net/textproto.readMIMEHeader
+  228.10MB  5.48% 27.38%   228.10MB  5.48%  slices.Grow[go.shape.[]go.opentelemetry.io/otel/attribute.KeyValue,go.shape.struct { Key go.opentelemetry.io/otel/attribute.Key; Value go.opentelemetry.io/otel/attribute.Value }]
+  226.06MB  5.43% 32.81%   226.06MB  5.43%  net/http.Header.Clone
+  224.60MB  5.39% 38.20%   224.60MB  5.39%  go.opentelemetry.io/otel/attribute.computeDataFixed
+  206.02MB  4.95% 43.15%   262.02MB  6.29%  go.opentelemetry.io/otel/internal/global.(*tracer).newSpan
+  202.56MB  4.86% 48.01%   202.56MB  4.86%  net/textproto.MIMEHeader.Set
+  200.52MB  4.81% 52.82%   239.52MB  5.75%  github.com/felixge/httpsnoop.Wrap
+  170.05MB  4.08% 56.91%   516.63MB 12.40%  net/http.readRequestLimit
+  144.53MB  3.47% 60.38%   721.66MB 17.33%  net/http.(*conn).readRequest
+  134.51MB  3.23% 63.61%   134.51MB  3.23%  context.WithValue

@@ -18,8 +18,9 @@ export const options = {
 
 http.setResponseCallback(http.expectedStatuses(200, 202))
 
+const HOT_ONLY = __ENV.HOT_ONLY === '1'
 function pickVideo() {
-  return Math.random() < 0.8 ? 1 + Math.floor(Math.random() * 1000) : 1 + Math.floor(Math.random() * 500000)
+  return HOT_ONLY || Math.random() < 0.8 ? 1 + Math.floor(Math.random() * 1000) : 1 + Math.floor(Math.random() * 500000)
 }
 
 export default function () {
@@ -37,7 +38,7 @@ export default function () {
     res = http.post(`${BASE}/api/play-events`, JSON.stringify({ video_id: pickVideo(), position_sec: Math.floor(Math.random() * 600) }),
       { headers: { 'X-User-Id': String(1 + Math.floor(Math.random() * 100000)), 'Content-Type': 'application/json' }, tags: { name: 'play_event' } })
   } else {
-    res = http.get(`${BASE}/api/videos/${9000000 + Math.floor(Math.random() * 1000000)}`, { tags: { name: 'missing' }, responseCallback: http.expectedStatuses(404) })
+    res = HOT_ONLY ? http.get(`${BASE}/api/videos/${pickVideo()}`) : http.get(`${BASE}/api/videos/${9000000 + Math.floor(Math.random() * 1000000)}`, { tags: { name: 'missing' }, responseCallback: http.expectedStatuses(404) })
   }
   check(res, { 'status ok': (x) => x.status === 200 || x.status === 202 || x.status === 404 })
 }

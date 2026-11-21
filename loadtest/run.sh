@@ -18,7 +18,8 @@ read -r c0 s0 a0 m0 < <(scrape)
 docker run --rm -u "$(id -u):$(id -g)" --network vod-gateway_default -v "$PWD/loadtest:/lt" \
   grafana/k6:0.54.0 run --quiet "$@" /lt/hot.js > "loadtest/results/$label.k6.txt" 2>&1 || true
 read -r c1 s1 a1 m1 < <(scrape)
-python3 - "$label" "$c0 $s0 $a0 $m0" "$c1 $s1 $a1 $m1" <<'PY'
+mem="$(docker stats --no-stream --format '{{.MemUsage}}' vod-gateway-api-1 | cut -d/ -f1 | tr -d ' ')"
+python3 - "$label" "$c0 $s0 $a0 $m0" "$c1 $s1 $a1 $m1" "$mem" <<'PY'
 import json, sys
 label = sys.argv[1]
 b = [float(x) for x in sys.argv[2].split()]
@@ -28,7 +29,8 @@ r['gc_cycles'] = int(e[0] - b[0])
 r['gc_pause_total_ms'] = round((e[1] - b[1]) * 1000, 1)
 r['alloc_bytes_per_req'] = round((e[2] - b[2]) / r['requests'])
 r['mallocs_per_req'] = round((e[3] - b[3]) / r['requests'], 1)
+r['api_mem'] = sys.argv[4]
 json.dump(r, open(f'loadtest/results/{label}.json', 'w'), indent=2)
 print(f"{label}: qps={r['qps']:.0f} p50={r['p50_ms']:.2f}ms p95={r['p95_ms']:.2f}ms p99={r['p99_ms']:.2f}ms "
-      f"err={r['error_rate']*100:.3f}% gc={r['gc_cycles']} pause={r['gc_pause_total_ms']}ms alloc/req={r['alloc_bytes_per_req']}B mallocs/req={r['mallocs_per_req']}")
+      f"err={r['error_rate']*100:.3f}% gc={r['gc_cycles']} pause={r['gc_pause_total_ms']}ms alloc/req={r['alloc_bytes_per_req']}B mallocs/req={r['mallocs_per_req']} mem={r['api_mem']}")
 PY

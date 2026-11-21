@@ -1,0 +1,13 @@
+{
+  "qps": 16863.1990498888,
+  "requests": 506041,
+  "p50_ms": 4.52147,
+  "p95_ms": 21.651479,
+  "p99_ms": 40.326007799999985,
+  "avg_ms": 6.988553022235132,
+  "error_rate": 0,
+  "gc_cycles": 120,
+  "gc_pause_total_ms": 408.8,
+  "alloc_bytes_per_req": 7949,
+  "mallocs_per_req": 106.8
+}
