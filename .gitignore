@@ -1,0 +1,12 @@
+.env
+data/
+*.key
+*.keyinfo
+/bin/
+node_modules/
+loadtest/tmp/
+edge/.wrangler/
+edge/node_modules/
+*.tfstate*
+.terraform/
+*.tfvars

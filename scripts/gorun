@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# 在 golang 容器裡跑 go 指令（WSL 沒裝 go）。用法：scripts/gorun go test ./...
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+exec docker run --rm --network host -u "$(id -u):$(id -g)" -e HOME=/tmp -e GOFLAGS=-buildvcs=false \
+  -e GOMODCACHE=/gomod -e GOCACHE=/gobuild -e GOPROXY \
+  -e TEST_MYSQL_DSN -e TEST_REDIS_ADDR \
+  -v "$HOME/.cache/gomod-docker:/gomod" -v "$HOME/.cache/gobuild-docker:/gobuild" -v "$ROOT:/src" -w /src \
+  golang:1.27 "$@"

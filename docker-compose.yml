@@ -1,0 +1,63 @@
+# 一鍵起整套：docker compose up -d --build
+# 埠號都綁 127.0.0.1，且避開 3306/6379/8080 等常見埠，避免跟本機其他服務衝突。
+name: vod-gateway
+services:
+  mysql:
+    image: mysql:8.4
+    command: >
+      --innodb-buffer-pool-size=512M
+      --innodb-flush-log-at-trx-commit=2
+      --max-connections=300
+      --character-set-server=utf8mb4
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: vod
+      MYSQL_USER: app
+      MYSQL_PASSWORD: app
+    ports: ["127.0.0.1:13306:3306"]
+    volumes: ["mysql-data:/var/lib/mysql"]
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -proot --silent"]
+      interval: 3s
+      retries: 40
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    ports: ["127.0.0.1:16379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      retries: 20
+  api:
+    build: .
+    environment:
+      MYSQL_DSN: app:app@tcp(mysql:3306)/vod?parseTime=true&charset=utf8mb4
+      REDIS_ADDR: redis:6379
+      HLS_DIR: /data/hls
+      KEY_DIR: /data/keys
+      HLS_SECRET: ${HLS_SECRET:-dev-secret-change-me}
+      ADMIN_TOKEN: ${ADMIN_TOKEN:-dev-admin}
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      IP_RATE: ${IP_RATE:-200}
+      IP_BURST: ${IP_BURST:-400}
+      TRUST_PROXY: ${TRUST_PROXY:-false}
+      OTEL_TRACES: ${OTEL_TRACES:-off}
+      GOGC: ${GOGC:-}
+      GOMEMLIMIT: ${GOMEMLIMIT:-}
+    volumes: ["./data:/data:ro"]
+    ports: ["127.0.0.1:8090:8080"]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+  consumer:
+    build: .
+    entrypoint: ["/app/consumer"]
+    environment:
+      MYSQL_DSN: app:app@tcp(mysql:3306)/vod?parseTime=true&charset=utf8mb4
+      REDIS_ADDR: redis:6379
+    ports: ["127.0.0.1:8091:8081"]
+    depends_on:
+      mysql: {condition: service_healthy}
+      redis: {condition: service_healthy}
+volumes:
+  mysql-data:

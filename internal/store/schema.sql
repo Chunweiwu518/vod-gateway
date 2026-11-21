@@ -1,0 +1,39 @@
+CREATE TABLE IF NOT EXISTS creators (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  name VARCHAR(64) NOT NULL,
+  followers INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_name (name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS videos (
+  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  creator_id BIGINT UNSIGNED NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  description VARCHAR(1000) NOT NULL DEFAULT '',
+  duration_sec INT UNSIGNED NOT NULL DEFAULT 0,
+  play_count BIGINT UNSIGNED NOT NULL DEFAULT 0,
+  fav_count INT UNSIGNED NOT NULL DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_creator_created (creator_id, created_at),
+  FULLTEXT KEY ft_title (title, description) WITH PARSER ngram
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS play_history (
+  user_id BIGINT UNSIGNED NOT NULL,
+  video_id BIGINT UNSIGNED NOT NULL,
+  position_sec INT UNSIGNED NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, video_id),
+  KEY idx_user_updated (user_id, updated_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS favorites (
+  user_id BIGINT UNSIGNED NOT NULL,
+  video_id BIGINT UNSIGNED NOT NULL,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, video_id),
+  KEY idx_user_created (user_id, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

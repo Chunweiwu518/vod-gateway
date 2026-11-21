@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>vod-gateway 播放測試</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 24px auto; padding: 0 16px; }
+  video { width: 100%; background: #000; border-radius: 8px; }
+  #status { font-family: ui-monospace, monospace; font-size: 14px; margin-top: 12px; white-space: pre-wrap; }
+  button { padding: 8px 14px; margin-right: 8px; }
+</style>
+</head>
+<body>
+<h1>HLS 加密串流播放測試</h1>
+<p>流程：向 API 要簽章網址 → hls.js 載入 m3u8 → 向 /key 取 AES-128 金鑰 → 解密 TS 播放。</p>
+<video id="v" controls muted playsinline></video>
+<div>
+  <button id="play">播放影片 <span id="vid">1</span></button>
+  <button id="event">送出播放事件</button>
+</div>
+<div id="status">idle</div>
+<script src="/hls.min.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const vid = params.get('id') || '1';
+document.getElementById('vid').textContent = vid;
+const video = document.getElementById('v');
+const status = document.getElementById('status');
+const log = (m) => { status.textContent = m; document.title = 'vod: ' + m.split('\n')[0]; };
+window.playState = { phase: 'idle', error: null, keyRequests: 0, segments: 0 };
+
+async function start() {
+  window.playState.phase = 'requesting-url';
+  log('requesting signed url');
+  const res = await fetch(`/api/videos/${vid}/play`, { method: 'POST' });
+  if (!res.ok) { window.playState.error = 'play-url ' + res.status; log('play-url failed: ' + res.status); return; }
+  const { url } = await res.json();
+  if (!Hls.isSupported()) { window.playState.error = 'MSE unsupported'; log('hls.js unsupported'); return; }
+  const hls = new Hls();
+  hls.on(Hls.Events.KEY_LOADED, () => { window.playState.keyRequests++; });
+  hls.on(Hls.Events.FRAG_LOADED, () => { window.playState.segments++; });
+  hls.on(Hls.Events.ERROR, (_, d) => {
+    window.playState.error = d.type + '/' + d.details + (d.response ? ' ' + d.response.code : '');
+    log('hls error: ' + window.playState.error);
+  });
+  hls.loadSource(url);
+  hls.attachMedia(video);
+  window.playState.phase = 'loading';
+  video.play().catch((e) => { window.playState.error = 'play(): ' + e.message; });
+}
+video.addEventListener('timeupdate', () => {
+  window.playState.phase = 'playing';
+  log(`playing t=${video.currentTime.toFixed(2)}s keys=${window.playState.keyRequests} segments=${window.playState.segments}`);
+});
+document.getElementById('play').onclick = start;
+document.getElementById('event').onclick = async () => {
+  const r = await fetch('/api/play-events', { method: 'POST', headers: { 'X-User-Id': '1', 'Content-Type': 'application/json' },
+    body: JSON.stringify({ video_id: Number(vid), position_sec: Math.floor(video.currentTime) }) });
+  log('play-event status ' + r.status);
+};
+if (params.get('autoplay') !== '0') start();
+</script>
+</body>
+</html>
