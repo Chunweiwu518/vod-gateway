@@ -10,3 +10,5 @@ edge/node_modules/
 *.tfstate*
 .terraform/
 *.tfvars
+test-results/
+playwright-report/
