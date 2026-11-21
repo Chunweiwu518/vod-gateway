@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -40,6 +41,11 @@ func run(log *slog.Logger) error {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
+	if config.Bool("ENABLE_PPROF", true) {
+		// 預設關閉；壓測時設 MUTEX_FRACTION=5 才會有 mutex profile，平常不付這個成本。
+		runtime.SetMutexProfileFraction(config.Int("MUTEX_FRACTION", 0))
+		runtime.SetBlockProfileRate(config.Int("BLOCK_RATE", 0))
+	}
 	shutdownTrace, err := obs.SetupTracing(ctx, config.Str("OTEL_TRACES", "off"), config.Float("OTEL_SAMPLE_RATIO", 0.01), os.Stderr)
 	if err != nil {
 		return err

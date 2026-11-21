@@ -1,0 +1,93 @@
+##### 第 1 次 #####
+videos
+500000
+step
+=== A. 創作者的影片列表：拿掉 (creator_id, created_at) 索引 ===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=50638 rows=20) (actual time=149..149 rows=20 loops=1)
+    -> Sort: videos.created_at DESC, videos.id DESC, limit input to 20 row(s) per chunk  (cost=50638 rows=495884) (actual time=149..149 rows=20 loops=1)
+        -> Filter: (videos.creator_id = 1234)  (cost=50638 rows=495884) (actual time=0.306..148 rows=267 loops=1)
+            -> Table scan on videos  (cost=50638 rows=495884) (actual time=0.0335..131 rows=500000 loops=1)
+
+step
+=== A. 加回 (creator_id, created_at) 索引 ===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=93.5 rows=20) (actual time=0.158..0.162 rows=20 loops=1)
+    -> Index lookup on videos using idx_creator_created (creator_id=1234) (reverse)  (cost=93.5 rows=267) (actual time=0.157..0.16 rows=20 loops=1)
+
+step
+=== B. 搜尋：LIKE 前後模糊（無法用索引）===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=50638 rows=20) (actual time=0.397..24.1 rows=20 loops=1)
+    -> Filter: ((videos.title like '%露營 vlog 懶人包%') or (videos.`description` like '%露營 vlog 懶人包%'))  (cost=50638 rows=104065) (actual time=0.397..24.1 rows=20 loops=1)
+        -> Table scan on videos  (cost=50638 rows=495884) (actual time=0.0127..11 rows=40494 loops=1)
+
+step
+=== B. 搜尋：FULLTEXT（ngram）===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=0.35 rows=1) (actual time=1.14..1.28 rows=20 loops=1)
+    -> Filter: (match videos.title,videos.`description` against ('"露營 vlog 懶人包"' in boolean mode))  (cost=0.35 rows=1) (actual time=1.14..1.28 rows=20 loops=1)
+        -> Full-text index search on videos using ft_title (title='"露營 vlog 懶人包"')  (cost=0.35 rows=1) (actual time=1.12..1.26 rows=20 loops=1)
+
+##### 第 2 次 #####
+videos
+500000
+step
+=== A. 創作者的影片列表：拿掉 (creator_id, created_at) 索引 ===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=50638 rows=20) (actual time=188..188 rows=20 loops=1)
+    -> Sort: videos.created_at DESC, videos.id DESC, limit input to 20 row(s) per chunk  (cost=50638 rows=495884) (actual time=188..188 rows=20 loops=1)
+        -> Filter: (videos.creator_id = 1234)  (cost=50638 rows=495884) (actual time=0.483..187 rows=267 loops=1)
+            -> Table scan on videos  (cost=50638 rows=495884) (actual time=0.0316..167 rows=500000 loops=1)
+
+step
+=== A. 加回 (creator_id, created_at) 索引 ===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=93.5 rows=20) (actual time=0.184..0.19 rows=20 loops=1)
+    -> Index lookup on videos using idx_creator_created (creator_id=1234) (reverse)  (cost=93.5 rows=267) (actual time=0.182..0.187 rows=20 loops=1)
+
+step
+=== B. 搜尋：LIKE 前後模糊（無法用索引）===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=50638 rows=20) (actual time=0.454..18.5 rows=20 loops=1)
+    -> Filter: ((videos.title like '%露營 vlog 懶人包%') or (videos.`description` like '%露營 vlog 懶人包%'))  (cost=50638 rows=104065) (actual time=0.453..18.5 rows=20 loops=1)
+        -> Table scan on videos  (cost=50638 rows=495884) (actual time=0.0101..8.3 rows=40494 loops=1)
+
+step
+=== B. 搜尋：FULLTEXT（ngram）===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=0.35 rows=1) (actual time=1.16..1.27 rows=20 loops=1)
+    -> Filter: (match videos.title,videos.`description` against ('"露營 vlog 懶人包"' in boolean mode))  (cost=0.35 rows=1) (actual time=1.15..1.27 rows=20 loops=1)
+        -> Full-text index search on videos using ft_title (title='"露營 vlog 懶人包"')  (cost=0.35 rows=1) (actual time=1.15..1.26 rows=20 loops=1)
+
+##### 第 3 次 #####
+videos
+500000
+step
+=== A. 創作者的影片列表：拿掉 (creator_id, created_at) 索引 ===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=50638 rows=20) (actual time=141..141 rows=20 loops=1)
+    -> Sort: videos.created_at DESC, videos.id DESC, limit input to 20 row(s) per chunk  (cost=50638 rows=495884) (actual time=141..141 rows=20 loops=1)
+        -> Filter: (videos.creator_id = 1234)  (cost=50638 rows=495884) (actual time=0.424..141 rows=267 loops=1)
+            -> Table scan on videos  (cost=50638 rows=495884) (actual time=0.0215..124 rows=500000 loops=1)
+
+step
+=== A. 加回 (creator_id, created_at) 索引 ===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=93.5 rows=20) (actual time=0.127..0.133 rows=20 loops=1)
+    -> Index lookup on videos using idx_creator_created (creator_id=1234) (reverse)  (cost=93.5 rows=267) (actual time=0.125..0.129 rows=20 loops=1)
+
+step
+=== B. 搜尋：LIKE 前後模糊（無法用索引）===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=50638 rows=20) (actual time=0.451..20.4 rows=20 loops=1)
+    -> Filter: ((videos.title like '%露營 vlog 懶人包%') or (videos.`description` like '%露營 vlog 懶人包%'))  (cost=50638 rows=104065) (actual time=0.45..20.4 rows=20 loops=1)
+        -> Table scan on videos  (cost=50638 rows=495884) (actual time=0.0215..9.3 rows=40494 loops=1)
+
+step
+=== B. 搜尋：FULLTEXT（ngram）===
+*************************** 1. row ***************************
+EXPLAIN: -> Limit: 20 row(s)  (cost=0.35 rows=1) (actual time=0.86..0.957 rows=20 loops=1)
+    -> Filter: (match videos.title,videos.`description` against ('"露營 vlog 懶人包"' in boolean mode))  (cost=0.35 rows=1) (actual time=0.859..0.955 rows=20 loops=1)
+        -> Full-text index search on videos using ft_title (title='"露營 vlog 懶人包"')  (cost=0.35 rows=1) (actual time=0.857..0.952 rows=20 loops=1)
+

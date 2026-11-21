@@ -42,6 +42,10 @@ services:
       IP_BURST: ${IP_BURST:-400}
       TRUST_PROXY: ${TRUST_PROXY:-false}
       OTEL_TRACES: ${OTEL_TRACES:-off}
+      USER_RATE: ${USER_RATE:-5}
+      USER_BURST: ${USER_BURST:-20}
+      MUTEX_FRACTION: ${MUTEX_FRACTION:-0}
+      BLOCK_RATE: ${BLOCK_RATE:-0}
       GOGC: ${GOGC:-}
       GOMEMLIMIT: ${GOMEMLIMIT:-}
     volumes: ["./data:/data:ro"]
