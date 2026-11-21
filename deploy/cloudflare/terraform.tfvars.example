@@ -1,0 +1,4 @@
+# 複製成 terraform.tfvars（已被 .gitignore 擋下）再填；以下全是佔位值，不是真實 id。
+zone_id       = "00000000000000000000000000000000"
+hostname      = "video.example.com"
+allowed_hosts = ["example.com", "www.example.com", "localhost:8090"]

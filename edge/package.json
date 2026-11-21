@@ -1,0 +1,15 @@
+{
+  "name": "vod-edge",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cloudflare Worker: HLS 邊緣鑑權（HMAC 簽章、防盜鏈）與 TS 邊緣快取",
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "e2e": "bash test/e2e.sh",
+    "dev": "wrangler dev --local"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}

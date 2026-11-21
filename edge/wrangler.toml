@@ -1,0 +1,12 @@
+name = "vod-edge"
+main = "src/index.js"
+compatibility_date = "2026-09-01"
+
+# 路由（zone／pattern）由 deploy/cloudflare 的 Terraform 綁定，這裡不寫 routes。
+# HLS_SECRET 不放這裡：正式用 `wrangler secret put HLS_SECRET`，本機開發用 edge/.dev.vars。
+
+[vars]
+ORIGIN_URL = "https://origin.example.com"   # 源站（Go 服務）；部署前改成真實網址
+ALLOWED_HOSTS = "example.com,*.example.com,localhost:8090"
+ALLOW_EMPTY_REFERER = "true"                 # 沒有 Origin／Referer 的 TS／m3u8 是否放行（/key 一律不放行）
+CACHE_TTL_SECONDS = "86400"
